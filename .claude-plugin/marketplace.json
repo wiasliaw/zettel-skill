@@ -1,0 +1,15 @@
+{
+  "name": "zettel-skill",
+  "description": "Claude Code plugin marketplace for running a Zettelkasten workflow inside any Obsidian vault",
+  "owner": {
+    "name": "wiasliaw",
+    "email": "wiasliaw@protonmail.com"
+  },
+  "plugins": [
+    {
+      "name": "zk",
+      "source": "./plugins/zk",
+      "description": "Generalized Zettelkasten workflow for any Obsidian vault: guided vault init, note lifecycle (fleeting/literature/permanent/query), memory adaptation, and qmd-backed retrieval."
+    }
+  ]
+}
