@@ -6,7 +6,7 @@ qmd 設定的操作規則，僅由 `/zk:init` 於訪談定為啟用 qmd 時呼�
 
 1. **探測環境**：`qmd --version` 確認版本；`qmd doctor` 看環境概況（embed 模型、運算後端），結果呈現給使用者供 args 決策參考，不據以代答。
 
-2. **索引範圍**（與使用者定）：collections MUST 含 config `permanent.place` 與 `reference.place` 兩個目錄，MAY 依使用者指定加入 vault 其他資料夾，MUST NOT 含 `fleeting.place` 與 `literature.place`（staging 不進索引）；每個 collection `pattern: "**/*.md"`，MUST NOT 設 `ignore`（staging 不在 collection path 內，本就不被索引，沒有東西需要排）、MUST NOT 設 collection `update-cmd`（reindex 只在 sync 開工與 `/zk:permanent` 收尾兩個維護點手動執行；且 plugin 不執行 git）。
+2. **索引範圍**（與使用者定）：collections MUST 含 config `permanent.place` 與 `reference.place` 兩個目錄，MAY 依使用者指定加入 vault 其他資料夾，MUST NOT 含 `fleeting.place` 與 `literature.place`（staging 不進索引）；每個 collection `pattern: "**/*.md"`，MUST NOT 設 `ignore`（staging 不在 collection path 內，本就不被索引，沒有東西需要排）、MUST NOT 設 collection `update-cmd`（reindex 只在 sync 開工與 `/zk:file`／`/zk:atomize`／`/zk:revise` 收尾兩類維護點手動執行；且 plugin 不執行 git）。
 
 3. **各 operation 的 args 字串**（與使用者定）：`query`／`search`／`update`／`embed` 四鍵，落 config `qmd` 對應鍵；缺省空字串。向使用者說明語意——這些字串於呼叫時原樣拼接於 subcommand 之後（例 `qmd query "<查詢>" <args>`），依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/recall.md`「共用 args 執行方式」的文字規則保留 POSIX 引號／跳脫的參數邊界，不解讀 flags 語意、不執行 shell 展開；使用者無偏好時保持空字串。
 

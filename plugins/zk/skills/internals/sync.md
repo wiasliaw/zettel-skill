@@ -1,6 +1,6 @@
 # sync
 
-`/zk:fleeting`／`/zk:literature` 開工前置的索引維護。全 plugin 恰兩處維護索引——本文件與 `/zk:permanent` 收尾，此外任何指令 MUST NOT 更新索引。本文件只做索引維護，不做任何筆記或記憶寫入。
+`/zk:fleeting`／`/zk:literature`／`/zk:atomize` 開工前置的索引維護（開工冪等 reindex）。主索引維護點恰為兩類——本文件的開工 reindex，與 `/zk:file`、`/zk:atomize`、`/zk:revise` 的收尾增量 reindex；此外任何指令 MUST NOT 更新索引。本文件只做索引維護，不做任何筆記或記憶寫入。
 
 ## 步驟
 

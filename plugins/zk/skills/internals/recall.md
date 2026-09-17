@@ -32,7 +32,7 @@
 
 ## 共用 args 執行方式
 
-recall、sync、permanent 收尾與 qmd-config 初始索引均依本節文字規則執行，不建立或內嵌解析程式、shell 函式或輔助腳本。呼叫方仍須先完成 vault root 與索引路徑驗證。
+recall、sync、`/zk:file`／`/zk:atomize`／`/zk:revise` 收尾 reindex 與 qmd-config 初始索引均依本節文字規則執行，不建立或內嵌解析程式、shell 函式或輔助腳本。呼叫方仍須先完成 vault root 與索引路徑驗證。
 
 1. 每次呼叫前活讀 `.zettel.json` 中該 operation 的 args 字串（可用 `jq -r '.qmd.query // empty' .zettel.json` 等）。缺省為空字串；存在但不是字串時停止並回報。
 2. 模型僅辨識 POSIX 引號／跳脫所表達的參數邊界：未引用的空白分隔參數；單引號內全部為字面值；雙引號保留其中空白；反斜線依所在引用情境處理跳脫；相鄰且未以空白分隔的片段屬同一參數。MUST 保留順序、值及明示的空參數，不推測或改寫 flags 語意。引號不成對、末尾跳脫不完整等格式錯誤，MUST 在呼叫 qmd 前停止並回報。
@@ -43,12 +43,8 @@ recall、sync、permanent 收尾與 qmd-config 初始索引均依本節文字規
 
 ## 讀全文鐵律
 
-任何命中都只是候選：作答實際引用或建立連結所依賴的候選，動筆前 MUST 讀過全文（深度閘門，通常 2 到 5 篇，其餘略讀至足以排除）。相似度分數與命中次數單獨 MUST NOT 構成引用或連結的理由——高分候選也必須先讀全文才可能被引用。
-
-## 同批姊妹筆記的發現
-
-`/zk:permanent` 同批剛歸檔、尚未 reindex 的姊妹筆記不依賴索引召回：單一 agent 執行內部由該次執行已讀入的內容涵蓋；跨 agent 的多輪批次中，後續輪次依 dispatch prompt 附帶的原子筆記確切路徑與拆分時 source-basename 清單發現，MUST NOT 以改名後的 reference basename 取代拆分前綴（agent 側動作見 `${CLAUDE_PLUGIN_ROOT}/agents/zk-atomizer.md` 步驟 7）。
+任何命中都只是候選：作答實際引用、建立連結或**擷取素材**所依賴的候選，動筆前 MUST 讀過全文（深度閘門，通常 2 到 5 篇，其餘略讀至足以排除）。相似度分數與命中次數單獨 MUST NOT 構成引用、連結或入卡的理由——高分候選也必須先讀全文才可能被採用。
 
 ## 索引唯讀
 
-本文件的全部操作皆為唯讀查詢，不執行 `qmd update`／`qmd embed`——索引維護點恰為 sync 開工與 `/zk:permanent` 收尾兩處，與本文件無涉。
+本文件的全部操作皆為唯讀查詢，不執行 `qmd update`／`qmd embed`——主索引維護點恰為 sync 開工與 `/zk:file`／`/zk:atomize`／`/zk:revise` 收尾，與本文件無涉（「共用 args 執行方式」僅是它們共用的文字規則）。

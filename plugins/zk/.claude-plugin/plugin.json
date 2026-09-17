@@ -1,7 +1,7 @@
 {
   "name": "zk",
-  "description": "Generalized Zettelkasten workflow for any Obsidian vault: guided vault init, note lifecycle (fleeting/literature/permanent/query), memory adaptation, and qmd-backed retrieval.",
-  "version": "0.2.1",
+  "description": "Generalized Zettelkasten workflow for any Obsidian vault: guided vault init, note lifecycle (fleeting/literature/file/atomize/query/revise), memory adaptation, and qmd-backed retrieval.",
+  "version": "0.8.0",
   "author": {
     "name": "wiasliaw",
     "email": "wiasliaw@protonmail.com"

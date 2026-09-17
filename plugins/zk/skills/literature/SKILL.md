@@ -7,22 +7,23 @@ disable-model-invocation: true
 
 # /zk:literature
 
-寫入範圍：config `literature.place`；互動閘門：建檔確認閘＋成稿 draft-then-review。本指令不執行任何 git 指令、不修改 plugin 檔案、不歸檔筆記（歸檔屬 `/zk:permanent`）。
+寫入範圍：config `literature.place`；互動閘門：建檔確認閘＋成稿 draft-then-review。本指令不執行任何 git 指令、不修改 plugin 檔案、不歸檔筆記（歸檔屬 `/zk:file`）。
 
 ## 流程
 
 1. **開工前置**（依序，致命紀律）：
    a. 確認 vault 已初始化——可觀察訊號恰為 vault root 存在 `.zettel.json`；不存在則停止並引導執行 `/zk:init`，MUST NOT 代為建立 config。
    b. 執行 `${CLAUDE_PLUGIN_ROOT}/skills/internals/sync.md`。
-   c. 依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/memory.md` 掃描 conventions／proposals；全程有效：工作中發現使用者慣例訊號時，依同檔「proposal 寫入操作」寫入 proposal 檔。
-   d. 寫入紀律（全程有效）：任何寫入前重讀檔案當前狀態（防 Obsidian 併發編輯）、最小 diff、MUST NOT 回滾使用者的併發修改。
+   c. 依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/memory.md` 掃描 conventions／proposals；全程有效：工作中發現使用者慣例訊號或可入佇列的意外發現時，依同檔「proposal 寫入操作」寫入對應類型的 proposal 檔。
+   d. **intent 掃描與離題捕獲**：依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/intent.md` 執行（開工掃描協定、離題捕獲全程有效）；本指令的應用面：精讀焦點與萃取取捨以 active intents 為據。
+   e. 寫入紀律（全程有效）：任何寫入前重讀檔案當前狀態（防 Obsidian 併發編輯）、最小 diff、MUST NOT 回滾使用者的併發修改。
 
 2. **輸入偵測**（依序判定；`literature.place` 活讀 config）：
    - `$ARGUMENTS` 是既有 `literature.place` 筆記路徑：進入「研讀流程」；本文非空時先讀入既有內容作為先前理解的基準。
    - 引數形似檔案路徑但該檔不存在：拒絕執行並說明路徑不存在，避免把打錯的路徑當成 source 建檔。
    - 其餘一律視為 source（URL 或書目出處）：走步驟 4 建檔確認閘。
 
-   **一筆記一 source**：使用者對一篇既有非空筆記要求「加入另一個來源」時，不併入該筆記，改把新來源當非路徑輸入走建檔確認閘另建獨立筆記；兩篇日後拆出的原子筆記以 inline `[[wikilink]]` 互連。
+   **一筆記一 source**：使用者對一篇既有非空筆記要求「加入另一個來源」時，不併入該筆記，改把新來源當非路徑輸入走建檔確認閘另建獨立筆記；兩篇日後各自歸檔、擷取出的原子筆記以 inline `[[wikilink]]` 互連。
 
 3. **devlog 開工解析**：目標筆記路徑在手時（既有筆記，或步驟 5 建檔完成後），依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/devlog.md` 解析其日誌。
 
@@ -44,14 +45,14 @@ disable-model-invocation: true
 對任一有效目標（剛建檔、既有空筆記、既有非空筆記）走同一條流程：
 
 1. **前置**：驗證 frontmatter `source` 存在，缺則拒絕執行並說明原因。
-2. **精讀**：dispatch `zk-research` agent（`${CLAUDE_PLUGIN_ROOT}/agents/zk-research.md`，其邊界自持）：帶上筆記路徑；使用者已陳述閱讀焦點（Intent 節文字或對話指示）時，dispatch prompt 帶上該焦點。成果以回傳交回對話作研讀底料，不寫入筆記。來源取不到全文時 agent 中止並回報原因，流程結束、筆記不動；不得降級改用二手資料。精讀成果交回後依 devlog 協定記一則 RUN。
+2. **精讀**：dispatch `zk-research` agent（`${CLAUDE_PLUGIN_ROOT}/agents/zk-research.md`，其邊界自持）：帶上筆記路徑；使用者已陳述閱讀焦點（Intent 節文字或對話指示）時，dispatch prompt 帶上該焦點——焦點的框定以開工掃描的 active intents 為據（無則不構成約束）。成果以回傳交回對話作研讀底料，不寫入筆記。來源取不到全文時 agent 中止並回報原因，流程結束、筆記不動；不得降級改用二手資料。精讀成果交回後依 devlog 協定記一則 RUN。
 3. **對話**：使用者提問，回答錨定 `source` 與精讀成果；來源之外的知識明確標示，不混入錨定回答。此階段不寫筆記本文、不 dispatch 審查 agent。
 4. **成稿**：使用者給出收尾信號（「寫成筆記」或同義表述）時，把問答軌跡（或精讀底料）綜合成本文：
    - 空筆記為新寫，非空筆記為就地增修既有內容；同一次成稿依對話實際聚焦填寫或更新 Intent 節（無節者一併補節）；同一次編輯更新 `updated`（規則見 `${CLAUDE_PLUGIN_ROOT}/skills/internals/note-format.md`）。未知 frontmatter 欄位一律保留。
    - 成稿路徑二擇一，依使用者表述判定：
      - **draft-then-review**（預設）：以 draft 呈現全文，使用者確認後才寫回，否決則不寫。
      - **直接寫入**：使用者以「直接寫入」「先落地」等同義表述明示時跳過 draft-then-review 逕行寫回；把關由步驟 5 的成稿後審計與使用者事後 review 承接。無此明示一律走預設路徑。
-5. **審計（成稿後立即執行）**：成稿寫回後，同一次指令內立即 dispatch `zk-adversarial-review` agent（`${CLAUDE_PLUGIN_ROOT}/agents/zk-adversarial-review.md`，其邊界自持）；一次指令涵蓋多篇成稿時逐篇成稿即審，不集中到指令末尾。審計一律只回報不修改；修正由本對話逐條評估報告建議後套用（`updated` 於套用修正的同一次編輯統一設定）。報告交回後依 devlog 協定記一則 RUN。
+5. **審計（成稿後立即執行）**：成稿寫回後，同一次指令內立即 dispatch `zk-adversarial-review` agent（`${CLAUDE_PLUGIN_ROOT}/agents/zk-adversarial-review.md`，其邊界自持），dispatch prompt 附本次 active intents 摘要（如有）；一次指令涵蓋多篇成稿時逐篇成稿即審，不集中到指令末尾。審計一律只回報不修改；修正由本對話逐條評估報告建議後套用（`updated` 於套用修正的同一次編輯統一設定）。報告交回後依 devlog 協定記一則 RUN。
    - 需要 slip-box 交叉核對素材時，由本對話先依 `${CLAUDE_PLUGIN_ROOT}/skills/internals/recall.md` 查詢（唯讀，不更新索引），再把結果放入 dispatch prompt——審查 agent 無 Bash 工具。
    - 存疑項的補讀處置（optional）：MAY 提議把存疑所缺的知識另建一篇新的 literature 筆記（走建檔確認閘，一筆記一 source；衍生筆記依 devlog 協定同時建日誌並記建立緣由）。補讀是提議而非自動執行，MUST 經使用者裁定才建檔；未獲裁定時存疑項維持原樣。
 

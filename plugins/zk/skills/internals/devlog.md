@@ -5,8 +5,8 @@ staging 筆記工作日誌（`.zettel/logs/`）的操作協定。日誌檔完整
 ## 觸發限定
 
 - 記錄與復盤僅由 `/zk:fleeting`、`/zk:literature` 的流程呼叫；MUST NOT 依對話情境獨立觸發。
-- `/zk:permanent` 不做開工解析、不寫入回合，唯一日誌動作是歸檔成功後刪除日誌（下方「刪除」節）。
-- `/zk:query`、`/zk:init`、`/zk:adapt` 不觸碰日誌。
+- `/zk:file` 不做開工解析、不寫入回合，唯一日誌動作是歸檔成功後刪除日誌（下方「刪除」節）。
+- `/zk:atomize`、`/zk:revise`、`/zk:query`、`/zk:init`、`/zk:adapt` 不觸碰日誌。
 - subagents MUST NOT 讀寫日誌——事件由 dispatch 方（外層指令對話）記錄。
 
 ## 路徑鏡射
@@ -34,9 +34,9 @@ session 中衍生新 staging 筆記時（例：`/zk:literature` 研讀中判斷�
 
 指令每輪收尾 MUST 寫 Reply（至少含 SUMMARY 節，內容即該輪指令的收尾回報）並重寫 STATUS——STATUS 是唯一可重寫的區塊。
 
-## 刪除（僅 /zk:permanent）
+## 刪除（僅 /zk:file）
 
-`/zk:permanent` 成功完成歸檔收尾後 MUST 刪除目標筆記的日誌（`rm .zettel/logs/<鏡射路徑>`）——刪除即封存，不設 archive。中途失敗未達刪除點時日誌保留原樣。源筆記已搬移時的補刪核對（比對續跑資料與日誌現況）由 `/zk:permanent` 自身流程承載，本檔不重述；無論何種情境，補刪 MUST NOT 重新拆分、MUST NOT 解析日誌回合。
+`/zk:file` 成功完成歸檔收尾後 MUST 刪除目標筆記的日誌（`rm .zettel/logs/<鏡射路徑>`）——刪除前 MUST 確認精簡出處（`intent`、`review`）已寫入歸檔筆記 frontmatter；無日誌則跳過。刪除即封存，不設 archive。文件自歸檔起唯讀，devlog 的使命隨之結束。中途失敗未達刪除點時日誌保留原樣，重跑歸檔成功後補刪；補刪 MUST NOT 解析日誌回合。
 
 ## 機械紀律（執行關鍵）
 
@@ -48,4 +48,4 @@ session 中衍生新 staging 筆記時（例：`/zk:literature` 研讀中判斷�
 
 ## 寫入範圍
 
-恰為 `.zettel/logs/` 下的日誌檔（含刪除）；MUST NOT 觸碰筆記、config、模板檔、conventions／proposals 與 qmd 索引。
+恰為 `.zettel/logs/` 下的日誌檔（含刪除）；MUST NOT 觸碰筆記、config、模板檔、conventions／proposals／intents 與 qmd 索引。
